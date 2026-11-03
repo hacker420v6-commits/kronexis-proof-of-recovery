@@ -1,18 +1,20 @@
 # Changelog
 
+## 0.4.2 — 2026-11-02
+
+### Fixes and improvements
+- Website `status.js`: removed dead code, switched ETH/USDC formatting to precise BigInt units, added optional Aave aBasUSDC position display, improved RPC error reporting, and cleaned fallback logic.
+- Updated RPC User-Agent string in the settlement verifier from the outdated 0.1 label to 0.4.2.
+- Package version bumped. All existing unit tests continue to pass.
+- Live Base balances remain unchanged (4.954804 USDC, 0 ETH) as of the previous reconfirmation.
+
+### Notes
+- No changes to encryption, signing, settlement verification logic, or commercial boundaries.
+- Website continues to treat all balances as nominal and distinct from verified project revenue.
+
 ## 0.4.1 — 2026-11-02
 
 ### Improvements
-- Live on-chain reconfirmation of Base USDC (4.954804) and ETH (0) balances as of block ~53442679; figures unchanged from 2026-10-29 observation.
-- Website status display now shows last successful RPC check timestamp and current block number.
-- More resilient RPC fallback list in status.js (publicnode, mainnet.base.org, 1rpc).
-- Dark mode toggle added to the website for better accessibility.
-- Version badge and export timestamp updated.
-- Strategy analyzer documentation clarified; projection_is_revenue remains false.
-- Package version bumped; all 26 tests continue to pass.
-- Improved error messages in CLI for network failures.
-
-### Notes
-- No private keys, credentials, or customer data added.
-- Settlement verification and evidence signing remain unchanged and secure.
-- This is still a pilot; no independent audit.
+- Live on-chain reconfirmation of Base USDC (4.954804) and ETH (0) balances.
+- Initial website status improvements, dark mode, and version badge.
+- Public source repository created.
