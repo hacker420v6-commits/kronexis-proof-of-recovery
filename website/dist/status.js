@@ -9,12 +9,13 @@ const USDC = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913";
 const AAVE_USDC = "0x4e65fe4dba92790696d040ac24aa414708f5c0ab";
 const RECIPIENT = "0x1fc6c61bccdf5534d316be5f6f3595b4ef079bd7";
 const BALANCE_CALL = "0x70a08231" + "0".repeat(24) + RECIPIENT.slice(2);
+const CACHE_KEY = "kronexis-last-status";
 
 let activeRpc = RPC_CANDIDATES[0];
 
-async function rpc(method, params) {
+async function rpc(method, params, attempt = 0) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 12000);
+  const timeout = setTimeout(() => controller.abort(), 15000);
   try {
     const response = await fetch(activeRpc, {
       method: "POST",
@@ -28,6 +29,12 @@ async function rpc(method, params) {
       throw new Error(message.error?.message || "Invalid RPC response");
     }
     return message.result;
+  } catch (err) {
+    if (attempt < 1) {
+      await new Promise(r => setTimeout(r, 400));
+      return rpc(method, params, attempt + 1);
+    }
+    throw err;
   } finally {
     clearTimeout(timeout);
   }
@@ -58,10 +65,27 @@ function setText(id, text) {
   if (el) el.textContent = text;
 }
 
+function loadCache() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (_) { return null; }
+}
+
+function saveCache(data) {
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch (_) {}
+}
+
 async function refreshStatus() {
   setText("chain-note", "Querying Base mainnet…");
   setText("wallet-balance", "Checking…");
   setText("yield-balance", "Checking…");
+  const cached = loadCache();
+  if (cached) {
+    setText("wallet-balance", cached.usdc || "—");
+    setText("yield-balance", cached.aave || "—");
+    setText("chain-note", "Showing last successful observation while refreshing…");
+  }
   try {
     const blockHex = await tryRpc("eth_blockNumber", []);
     const block = parseInt(blockHex, 16);
@@ -85,17 +109,18 @@ async function refreshStatus() {
     setText("verified-revenue", "0.000000 USDC");
     setText("invoice-status", "Unpaid (no confirmed settlement)");
     setText("confirmed-block", block.toLocaleString());
-
     setText("usdc-balance", usdcStr);
     setText("eth-balance", ethStr);
     setText("block-number", block.toLocaleString());
     setText("last-check", now);
-
     setText("chain-note", `Live check at block ${block.toLocaleString()} via ${activeRpc.replace("https://", "")}. Balances are nominal and are not project revenue. Verified revenue remains $0.`);
+
+    saveCache({ usdc: usdcStr, aave: aaveStr, block, ts: now });
   } catch (err) {
-    setText("wallet-balance", "Unavailable");
-    setText("yield-balance", "Unavailable");
-    setText("chain-note", "Live chain query failed. Last known observation: 4.954804 USDC, 0 ETH, 0 aBasUSDC (2026-10-29). " + (err.message || err));
+    const fallback = cached ? "Showing last cached observation. " : "Last known: 4.954804 USDC, 0 ETH (2026-10-29). ";
+    setText("wallet-balance", cached?.usdc || "Unavailable");
+    setText("yield-balance", cached?.aave || "Unavailable");
+    setText("chain-note", fallback + "Live query failed: " + (err.message || err));
   }
 }
 
