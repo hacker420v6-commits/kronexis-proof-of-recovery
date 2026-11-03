@@ -1,20 +1,20 @@
 # Changelog
 
-## 0.4.2 — 2026-11-02
+## 0.5.0 — 2026-11-02
 
-### Fixes and improvements
-- Website `status.js`: removed dead code, switched ETH/USDC formatting to precise BigInt units, added optional Aave aBasUSDC position display, improved RPC error reporting, and cleaned fallback logic.
-- Updated RPC User-Agent string in the settlement verifier from the outdated 0.1 label to 0.4.2.
-- Package version bumped. All existing unit tests continue to pass.
-- Live Base balances remain unchanged (4.954804 USDC, 0 ETH) as of the previous reconfirmation.
+### Reliability and efficiency
+- Settlement and revenue RPC layer now retries transient failures (URL errors, timeouts) with exponential backoff (up to 3 attempts, 20s timeout).
+- User-Agent updated to Kronexis-Earner/0.5.0.
+- Website status display remains precise (BigInt) and now benefits from the same multi-endpoint fallback pattern plus local last-known cache.
+- All 26 unit tests continue to pass. No changes to encryption, signing, or commercial boundary.
 
 ### Notes
-- No changes to encryption, signing, settlement verification logic, or commercial boundaries.
-- Website continues to treat all balances as nominal and distinct from verified project revenue.
+- Still a pilot. Projections and balances are not guaranteed revenue.
+- No private keys or credentials introduced.
+
+## 0.4.2 — 2026-11-02
+- Website status.js precise BigInt formatting and primary card population.
+- Settlement User-Agent updated.
 
 ## 0.4.1 — 2026-11-02
-
-### Improvements
-- Live on-chain reconfirmation of Base USDC (4.954804) and ETH (0) balances.
-- Initial website status improvements, dark mode, and version badge.
-- Public source repository created.
+- Live balance reconfirmation and initial website improvements.
